@@ -1,0 +1,301 @@
+<html  lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+
+    <title>Flask App </title>
+
+    <!--Gauge  -->
+    <script type="text/javascript" src="http://pubnub.github.io/eon/lib/eon.js"></script>
+
+    <!--High CHART LIVE  -->
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+    <!-- JQuery links  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Bootstraps Java Scipts Links -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+    <div class="jumbotron">
+        <h1 class="text-center text-white">Welcome to CS147 Sensor Data Visualization </h1>
+    </div>
+    <br>
+    <br>
+
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-5 jumbotron p-2 mx-1">
+                <h1 class="sensor1"> Sensor : </h1>
+            </div>
+            <br>
+
+            <div class="col-5 jumbotron p-2 mx-1">
+                <h1 class="sensor2">Sensor :</h1>
+            </div>
+            <br>
+           
+           <div class="col-5 jumbotron p-2 mx-1">
+                <h1 class="sensor3">Sensor :</h1>
+           </div>
+           <br>
+
+        </div>
+    </div>
+
+    <style>
+
+        .jumbotron{
+            widows: 150px;
+            height: 220px;
+            justify-content: center;
+        }
+
+        .row{
+            justify-content: center;
+        }
+
+
+    </style>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="container-fluid" id="data-moisture">
+
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<br>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="container-fluid" id="data-intensity">
+
+            </div>
+        </div>
+    </div>
+<br>
+<br>
+<br>
+ 
+   <div class="container-fluid">
+        <div class="row">
+             <div class="container-fluid" id="data-temperature">
+     
+             </div>
+        </div>
+     </div>
+
+    <script>
+        var chartMoisture;
+        var chartIntensity;
+        var chartTemperature;
+
+        function requestData()
+        {
+            var requests = $.get('/data');
+
+            var tm = requests.done(function (result)
+            {
+                var serMoisture = chartMoisture.ser[0];
+		var serIntensity = chartIntensity.ser[0];
+		var serTemperature = chartTemperature.ser[0];
+
+                var moistureData = [];
+                var intensityData = [];
+		var temperatureData = [];
+
+		var changeMoisture = serMoisture.data.length > 20;
+		var changeIntensity = serIntensity.data.length > 20;
+		var changeTemperature = serTemperature.data.length > 20;
+
+                // Updating Time and Moisture
+                moistureData.push(result[0]);
+                moistureData.push(result[1]);
+
+                // Updating Time and Intensity
+                intensityData.push(result[0]);
+                intensityData.push(result[2]);
+
+		// Updating Time and Temperature
+		temperatureData.push(result[0]);
+		temperatureData.push(result[3]);
+
+		// Initializing variables for Chart
+                chartMoisture.ser[0].addPoint(moistureData, true, changeMoisture);
+                chartIntensity.ser[0].addPoint(intensityData, true, changeIntensity);
+		chartTemperature.ser[0].addPoint(temperatureData, true, changeTemperature);
+
+		// Updating the Sensor Names to be displayed
+                $(".sensor1").text("");
+                $(".sensor1").text("Soil Moisture : " + moistureData[1] );
+                $(".sensor2").text("");
+                $(".sensor2").text("Light Intensity : " +  intensityData[1] + "%");
+		$(".sensor3").text("");
+		$(".sensor3").text("Temperature :" + temperatureData[1]);
+            });
+        }
+
+        $(document).ready(function()
+        {
+            chartMoisture = new Highcharts.Chart({
+                chart:
+                    {
+                    renderTo: 'data-moisture',
+                    defaultSeriesType: 'area',
+                    events: {
+                        load: requestData
+                            }
+                    },
+                title:
+                    {
+                    text: 'Soil Moisture'
+                    },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150,
+                    maxZoom: 20 * 10000
+                        },
+                yAxis: {
+                    minPadding: 0.2,
+                    maxPadding: 0.2,
+                    title: {
+                        text: 'Value',
+                        margin: 80
+                            }
+                         },
+                ser: [{
+                    color : '#c23d23',
+                    lineColor: '#303030',
+                    name: 'Soil Moisture',
+                    data: []
+                }]
+            });
+
+
+            chartIntensity = new Highcharts.Chart({
+                chart:
+                    {
+                        renderTo: 'data-intensity',
+                        defaultSeriesType: 'area',
+                        events: {
+                            load: requestData
+                        }
+                    },
+                title:
+                    {
+                        text: 'Light Intensity'
+                    },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150,
+                    maxZoom: 20 * 10000
+                },
+                yAxis: {
+                    minPadding: 0.2,
+                    maxPadding: 0.2,
+                    title: {
+                        text: 'Value',
+                        margin: 80
+                    }
+                },
+                ser: [{
+                    lineColor: '#1d82b8',
+                    name: 'Light Intensity',
+                    data: []
+                }]
+            });    
+
+
+            chartTemperature = new Highcharts.Chart({
+                chart:
+                    {
+                        renderTo: 'data-temperature',
+                        defaultSeriesType: 'area',
+                        events: {
+                            load: requestData
+                        }
+                    },
+                title:
+                    {
+                        text: 'Temperature'
+                    },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150,
+                    maxZoom: 20 * 10000
+                },
+                yAxis: {
+                    minPadding: 0.2,
+                    maxPadding: 0.2,
+                    title: {
+                        text: 'Value',
+                        margin: 80
+                    }
+                },
+                ser: [{
+		    color : '#c23d23',
+                    lineColor: '#86e30b',
+                    name: 'Temperature',
+                    data: []
+                }]
+            });  
+
+        });
+    </script>
+
+
+
+<script>
+    class Image{
+
+        constructor(imgUrl, size)
+        {
+            this.imgUrl=imgUrl;
+            this.size=size;
+        }
+
+        backgroundImage()
+        {
+            console.log("inside function ")
+            var img = document.querySelector(".jumbotron");
+
+            var text = "margin:auto;"+
+                "background-image: url("+this.imgUrl+");" +
+                "background-size:cover;"+
+                "opacity:1;"+
+                "background-blend-mode: darken;"+
+                "height: "+ this.size + "vh;";
+
+            img.style.cssText =  text;
+        }
+
+        centerTitle()
+        {
+            var t1 = document.querySelector("#title");
+            t1.classList.add("text-white");
+            t1.classList.add("text-center");
+            t1.classList.add("display-3");
+        }
+    }
+    const imgUrl = 'https://media3.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif'
+    const size = "50";
+    var obj = new Image(imgUrl, size);
+    obj.backgroundImage();
+    obj.centerTitle();
+    </script>
+</body>
+
+
+</html>
