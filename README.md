@@ -9,5 +9,3 @@ https://drive.google.com/file/d/1b6QRHbkxIfHQ-VffNkLDmCXKeJ7joh5P/view?usp=shari
 
 # Block Diagram
 ![](images/Picture1.jpg)
-
-# Technologies Used
