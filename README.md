@@ -8,6 +8,6 @@ and providing all the sensory data in a front-end user interface to keep track o
 https://drive.google.com/file/d/1b6QRHbkxIfHQ-VffNkLDmCXKeJ7joh5P/view?usp=sharing
 
 # Block Diagram
-
+![](images/Picture1.jpg)
 
 # Technologies Used
